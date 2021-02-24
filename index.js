@@ -1,3 +1,47 @@
+const ConfirmComponent = () =>
+  Vue.component("confirm-component", {
+    props: { pageName: String },
+    data: () => ({ localUnixtime: NaN }),
+    created: function () {
+      console.log("component created!");
+    },
+    watch: {
+      unixtime: {
+        handler: function () {
+          this.localUnixtime = this.unixtime;
+        },
+        immediate: true,
+      },
+    },
+    template: `
+      <fieldset>
+        <legend>Input here!</legend>
+        v-model<input type="number" :value="unixtime" @input="$emit('change', $event.target.value)">
+        props<input type="number" v-model="localUnixtime">
+        <button @click="$emit('change', localUnixtime)">Check</button>
+      </fieldset>
+    `,
+  });
+
+const SampleOutputComponent = () =>
+  Vue.component("sample-output-component", {
+    props: { unixtime: Number },
+    created: function () {
+      console.log("component created!");
+    },
+    computed: {
+      formattedTime: function () {
+        return new Date(this.unixtime * 1000).toLocaleDateString("ja-jp");
+      },
+    },
+    template: `
+      <fieldset>
+        <legend>Output!</legend>
+        <span>{{ unixtime }} is {{formattedTime}}</span>
+      </fieldset>
+    `,
+  });
+
 const SamplePage = () =>
   Vue.component("sample-page", {
     created: function () {
@@ -23,7 +67,6 @@ const SamplePage = () =>
         const textDocument = (await axios.get(`${apiBase}?${paramsStr}`)).data
           .parse?.text;
         this.wikipediaPageDocument = textDocument;
-        //document.write(textDocument);
         console.log(textDocument);
       },
     },
@@ -47,6 +90,8 @@ document.write(`
   <script src="https://cdn.jsdelivr.net/npm/axios@0.21.1/dist/axios.min.js"></script>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/kognise/water.css@latest/dist/light.min.css">
   <script>
+    (${ConfirmComponent.toString()})();
+    (${SampleOutputComponent.toString()})();
     (${SamplePage.toString()})();
     new Vue({ el: "#app" });
   </script>
